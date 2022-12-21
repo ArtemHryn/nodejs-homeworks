@@ -1,6 +1,6 @@
 const Joi = require("joi");
 
-const validationAddContact = (req, res, next) => {
+const validateAddContact = (req, res, next) => {
   const schema = Joi.object({
     name: Joi.string().min(2).required(),
     email: Joi.string().email().required(),
@@ -13,7 +13,7 @@ const validationAddContact = (req, res, next) => {
   next();
 };
 
-const validationUpdateContact = (req, res, next) => {
+const validateUpdateContact = (req, res, next) => {
   const schema = Joi.object({
     name: Joi.string().min(2).required(),
     email: Joi.string().email().required(),
@@ -27,6 +27,6 @@ const validationUpdateContact = (req, res, next) => {
 };
 
 module.exports = {
-  validationAddContact,
-  validationUpdateContact,
+  validateAddContact,
+  validateUpdateContact,
 };

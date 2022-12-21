@@ -8,8 +8,8 @@ const {
   updateContact,
 } = require("../../models/contacts");
 const {
-  validationAddContact,
-  validationUpdateContact,
+  validateAddContact,
+  validateUpdateContact,
 } = require("../../middlewares/validationMiddlewares");
 
 const router = express.Router();
@@ -26,7 +26,7 @@ router.get("/:contactId", async (req, res, next) => {
   res.status(200).json(contact);
 });
 
-router.post("/", validationAddContact, async (req, res, next) => {
+router.post("/", validateAddContact, async (req, res, next) => {
   const result = await addContact(req.body, res);
 
   res.status(201).json(result);
@@ -40,7 +40,7 @@ router.delete("/:contactId", async (req, res, next) => {
   res.status(200).json({ message: "contact deleted" });
 });
 
-router.put("/:contactId", validationUpdateContact, async (req, res, next) => {
+router.put("/:contactId", validateUpdateContact, async (req, res, next) => {
   const result = await updateContact(req.params.contactId, req.body, res);
   if (!result) {
     return res.status(404).json({ message: "Not found" });
