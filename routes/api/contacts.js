@@ -1,51 +1,35 @@
 const express = require("express");
 
 const {
-  listContacts,
-  getContactById,
-  addContact,
-  removeContact,
-  updateContact,
-} = require("../../models/contacts");
+  listContactsController,
+  getContactByIdController,
+  removeContactController,
+  addContactController,
+  updateContactController,
+  updateContactFavoriteByIdController,
+} = require("../../controllers/contactsControllers");
+const { asyncWrapper } = require("../../helper/apiHelpers");
 const {
   validateAddContact,
   validateUpdateContact,
+  validateUpdateContactFavorite,
 } = require("../../middlewares/validation");
 
 const router = express.Router();
 
-router.get("/", async (req, res, next) => {
-  res.json(await listContacts());
-});
+router.get("/", asyncWrapper(listContactsController));
 
-router.get("/:contactId", async (req, res, next) => {
-  const contact = await getContactById(req.params.contactId);
-  if (!contact) {
-    return res.status(404).json({ message: "Not found" });
-  }
-  res.status(200).json(contact);
-});
+router.get("/:contactId", asyncWrapper(getContactByIdController));
 
-router.post("/", validateAddContact, async (req, res, next) => {
-  const result = await addContact(req.body, res);
+router.post("/", validateAddContact, asyncWrapper(addContactController));
 
-  res.status(201).json(result);
-});
+router.delete("/:contactId", asyncWrapper(removeContactController));
 
-router.delete("/:contactId", async (req, res, next) => {
-  const result = await removeContact(req.params.contactId, res);
-  if (!result) {
-    return res.status(404).json({ message: "Not found" });
-  }
-  res.status(200).json({ message: "contact deleted" });
-});
+router.put("/:contactId", validateUpdateContact, asyncWrapper(updateContactController));
 
-router.put("/:contactId", validateUpdateContact, async (req, res, next) => {
-  const result = await updateContact(req.params.contactId, req.body, res);
-  if (!result) {
-    return res.status(404).json({ message: "Not found" });
-  }
-  res.json(result);
-});
+router.patch(
+  "/:contactId/favorite", validateUpdateContactFavorite,
+  asyncWrapper(updateContactFavoriteByIdController)
+);
 
 module.exports = router;
