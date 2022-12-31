@@ -1,4 +1,4 @@
-const { ValidationError, NotFoundContact, FailedToUpdate } = require("./errors");
+const { MainError } = require("./errors");
 
 const asyncWrapper = (controller) => {
   return (req, res, next) => {
@@ -7,7 +7,7 @@ const asyncWrapper = (controller) => {
 };
 
 const errorHandler = (err, req, res, next) => {
-  if (err instanceof ValidationError || err instanceof NotFoundContact || err instanceof FailedToUpdate) {
+  if (err instanceof MainError) {
     return res.status(err.status).json({ message: err.message });
   }
 
