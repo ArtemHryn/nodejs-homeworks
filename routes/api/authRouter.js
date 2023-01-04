@@ -5,11 +5,13 @@ const {
   logoutController,
   getCurrentUserController,
   updateSubscriptionController,
+  updateAvatar,
 } = require("../../controllers/authControllers");
 const { asyncWrapper } = require("../../helper/apiHelpers");
 const {
   authTokenCheckMiddleware,
 } = require("../../middlewares/authTokenCheck");
+const { uploadMiddleware } = require("../../middlewares/avatarMiddleware");
 const {
   validationRegistration,
   validationLogin,
@@ -22,7 +24,7 @@ router.use(authTokenCheckMiddleware);
 
 router.post(
   "/signup",
-  validationRegistration,
+  [uploadMiddleware.single("avatar"), validationRegistration],
   asyncWrapper(registrationController)
 );
 
@@ -33,5 +35,7 @@ router.get("/logout", asyncWrapper(logoutController));
 router.get("/current", asyncWrapper(getCurrentUserController));
 
 router.patch("/", validationSub, asyncWrapper(updateSubscriptionController));
+
+router.patch("/avatars", uploadMiddleware.single("avatar"), asyncWrapper(updateAvatar));
 
 module.exports = router;

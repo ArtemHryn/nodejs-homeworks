@@ -15,7 +15,9 @@ const registration = async (body) => {
 const login = async ({ email, password }) => {
   const user = await User.findOne({ email });
 
-  if (!user && !(await bcrypt.compare(password, user.password)))
+  const isCorrectCredentials =
+    !user && !(await bcrypt.compare(password, user.password));
+  if (isCorrectCredentials)
     throw new NotAuthorizedError(`Email or password is wrong`);
 
   const token = jwt.sign(
@@ -40,8 +42,12 @@ const currentUser = async (userId) => {
 };
 
 const updateSubscription = async (userId, subscription) => {
-  await User.findByIdAndUpdate(userId, { $set: {subscription} });
+  await User.findByIdAndUpdate(userId, { $set: { subscription } });
 };
+
+const updateAvatar = async () => {
+
+}
 
 module.exports = {
   registration,
@@ -49,4 +55,5 @@ module.exports = {
   logout,
   currentUser,
   updateSubscription,
+  updateAvatar,
 };
