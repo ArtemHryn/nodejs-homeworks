@@ -5,7 +5,7 @@ const {
   logoutController,
   getCurrentUserController,
   updateSubscriptionController,
-  updateAvatar,
+  updateAvatarController,
 } = require("../../controllers/authControllers");
 const { asyncWrapper } = require("../../helper/apiHelpers");
 const {
@@ -36,6 +36,10 @@ router.get("/current", asyncWrapper(getCurrentUserController));
 
 router.patch("/", validationSub, asyncWrapper(updateSubscriptionController));
 
-router.patch("/avatars", uploadMiddleware.single("avatar"), asyncWrapper(updateAvatar));
+router.patch(
+  "/avatars",
+  uploadMiddleware.single("avatar"),
+  asyncWrapper(updateAvatarController)
+);
 
 module.exports = router;

@@ -45,9 +45,9 @@ const updateSubscription = async (userId, subscription) => {
   await User.findByIdAndUpdate(userId, { $set: { subscription } });
 };
 
-const updateAvatar = async () => {
-
-}
+const updateAvatar = async (userId, avatarURL) => {
+  await User.findOneAndUpdate({_id: userId}, { $set: { avatarURL } });
+};
 
 module.exports = {
   registration,
