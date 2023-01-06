@@ -1,13 +1,25 @@
+const gravatar = require("gravatar");
+const { copyAvatar } = require("../helper/avatarOptions");
+const fs = require("fs").promises;
 const {
   registration,
   login,
   logout,
   currentUser,
   updateSubscription,
+  updateAvatar,
 } = require("../services/authServices");
 
-const registrationController = async (req, res) => {
+const registrationController = async (req, res, next) => {
+  const { path } = req.file;
+  req.body.avatarURL = gravatar.url(req.body.email);
   const { email, subscription } = await registration(req.body);
+  try {
+    await copyAvatar(req.file, req.body);
+  } catch (error) {
+    await fs.unlink(path);
+    return next(error);
+  }
   res.status(201).json({ user: { email, subscription } });
 };
 
@@ -40,10 +52,25 @@ const updateSubscriptionController = async (req, res) => {
     .json({ message: `Subscription has been changed to '${subscription}'` });
 };
 
+const updateAvatarController = async (req, res, next) => {
+  const { _id } = req.user;
+  const { path } = req.file;
+  req.body.avatarURL = gravatar.url(req.body.email);
+  await updateAvatar(_id, req.body.avatarURL);
+  try {
+    await copyAvatar(req.file, req.body);
+  } catch (error) {
+    await fs.unlink(path);
+    return next(error);
+  }
+  res.json({ avatarURL: req.body.avatarURL });
+};
+
 module.exports = {
   registrationController,
   loginController,
   logoutController,
   getCurrentUserController,
   updateSubscriptionController,
+  updateAvatarController,
 };
