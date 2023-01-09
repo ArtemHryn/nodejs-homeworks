@@ -1,24 +1,29 @@
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { Conflict, NotAuthorizedError } = require("../helper/errors");
+const sha256 = require("sha256");
+const { checkCredentials } = require("../helper/checkCredentials");
+require("dotenv").config();
+
+const { MainError } = require("../helper/errors");
+const { sendMail } = require("../helper/sendMail");
 const { User } = require("../models/userModel");
 
 const registration = async (body) => {
   const checkEMail = await User.findOne({ email: body.email });
   if (checkEMail) {
-    throw new Conflict("Email in use");
+    throw new MainError(409, "Email in use");
   }
 
+  const verificationToken = sha256(body.email + process.env.JWT_SALT);
+  body.verificationToken = verificationToken;
   const user = new User(body);
+
+  sendMail(body.email, verificationToken);
   return await user.save();
 };
 const login = async ({ email, password }) => {
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email, verify: true });
 
-  const isCorrectCredentials =
-    !user && !(await bcrypt.compare(password, user.password));
-  if (isCorrectCredentials)
-    throw new NotAuthorizedError(`Email or password is wrong`);
+  checkCredentials(user, password)
 
   const token = jwt.sign(
     {
@@ -46,7 +51,30 @@ const updateSubscription = async (userId, subscription) => {
 };
 
 const updateAvatar = async (userId, avatarURL) => {
-  await User.findOneAndUpdate({_id: userId}, { $set: { avatarURL } });
+  await User.findOneAndUpdate({ _id: userId }, { $set: { avatarURL } });
+};
+
+const verification = async (verificationToken) => {
+  const user = await User.findOne({ verificationToken, verify: false });
+  if (!user) {
+    throw new MainError(404, "User not found");
+  }
+  user.verificationToken = "null";
+  user.verify = true;
+  await user.save();
+};
+
+const resendVerification = async (email) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new MainError(400, "User not found");
+  }
+  if (user.verify) {
+    throw new MainError(400, "Verification has already been passed");
+  }
+
+  sendMail(email, user.verificationToken);
+
 };
 
 module.exports = {
@@ -56,4 +84,6 @@ module.exports = {
   currentUser,
   updateSubscription,
   updateAvatar,
+  verification,
+  resendVerification,
 };
