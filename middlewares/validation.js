@@ -1,4 +1,4 @@
-const { ValidationError } = require("../helper/errors");
+const { MainError } = require("../helper/errors");
 const AddContactSchema = require("../helper/contactValidation/addContactValidationSchema");
 const {
   updateContactFavoriteSchema,
@@ -13,11 +13,12 @@ const {
   loginValidationScheme,
 } = require("../helper/authValidation/loginValidationSchema");
 const { subscriptionValidationSchema } = require("../helper/authValidation/subValidationSchema");
+const { resendVerificationValidationSchema } = require("../helper/authValidation/resendVerificationValidationSchema");
 
 const validateAddContact = (req, res, next) => {
   const validationResult = AddContactSchema.validate(req.body);
   if (validationResult.error) {
-    next(new ValidationError(validationResult.error.details[0].message));
+    next(new MainError(400, validationResult.error.details[0].message));
   }
   next();
 };
@@ -25,7 +26,7 @@ const validateAddContact = (req, res, next) => {
 const validateUpdateContact = (req, res, next) => {
   const validationResult = updateContactSchema.validate(req.body);
   if (validationResult.error) {
-    next(new ValidationError(validationResult.error.details[0].message));
+    next(new MainError(400, validationResult.error.details[0].message));
   }
   next();
 };
@@ -33,7 +34,7 @@ const validateUpdateContact = (req, res, next) => {
 const validateUpdateContactFavorite = (req, res, next) => {
   const validationResult = updateContactFavoriteSchema.validate(req.body);
   if (validationResult.error) {
-    throw new ValidationError("missing field favorite");
+    next(new MainError(400, "missing field favorite"));
   }
   next();
 };
@@ -41,7 +42,7 @@ const validateUpdateContactFavorite = (req, res, next) => {
 const validationRegistration = (req, res, next) => {
   const validationResult = registrationSchema.validate(req.body);
   if (validationResult.error) {
-    next(new ValidationError(validationResult.error.details[0].message));
+    next(new MainError(400, validationResult.error.details[0].message));
   }
   next();
 };
@@ -49,7 +50,7 @@ const validationRegistration = (req, res, next) => {
 const validationLogin = (req, res, next) => {
   const validationResult = loginValidationScheme.validate(req.body);
   if (validationResult.error) {
-    next(new ValidationError(validationResult.error.details[0].message));
+    next(new MainError(400, validationResult.error.details[0].message));
   }
   next();
 };
@@ -57,10 +58,18 @@ const validationLogin = (req, res, next) => {
 const validationSub = (req, res, next) => {
   const validationResult = subscriptionValidationSchema.validate(req.query);
   if (validationResult.error) {
-    next(new ValidationError(validationResult.error.details[0].message));
+    next(new MainError(400, validationResult.error.details[0].message));
   }
   next();
 };
+
+const resendVerificationValidation = (req, res, next) => {
+    const validationResult = resendVerificationValidationSchema.validate(req.body);
+    if (validationResult.error) {
+      next(new MainError(400, "missing required field email"));
+    }
+    next();
+}
 
 module.exports = {
   validateAddContact,
@@ -69,4 +78,5 @@ module.exports = {
   validationRegistration,
   validationLogin,
   validationSub,
+  resendVerificationValidation,
 };

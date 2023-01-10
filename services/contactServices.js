@@ -1,4 +1,4 @@
-const { NotFoundContact, FailedToUpdate } = require("../helper/errors");
+const { MainError } = require("../helper/errors");
 const { Contact } = require("../models/contactsModel");
 
 const getContacts = async (owner, { skip, limit }, filters) => {
@@ -10,7 +10,7 @@ const getContacts = async (owner, { skip, limit }, filters) => {
 
 const getContactById = async (contactId, owner) => {
   const contact = Contact.findOne({ _id: contactId, owner }).select({ __v: 0 });
-  if (!contact) throw new NotFoundContact(`contact ${contactId} not found`);
+  if (!contact) throw new MainError(401, `contact ${contactId} not found`);
   return contact;
 };
 
@@ -32,7 +32,7 @@ const updateContactByID = async (contactId, owner, body) => {
     { _id: contactId, owner },
     { $set: body }
   );
-  if (!contact) throw new FailedToUpdate("Please, check data");
+  if (!contact) throw new MainError(400, "Please, check data");
 };
 
 const updateContactFavoriteById = async (contactId, owner, favorite) => {
@@ -40,7 +40,7 @@ const updateContactFavoriteById = async (contactId, owner, favorite) => {
     { _id: contactId, owner },
     { $set: { favorite } }
   );
-  if (!contact) throw new FailedToUpdate("Please, check contact id");
+  if (!contact) throw new MainError(400, "Please, check contact id");
   return contact;
 };
 

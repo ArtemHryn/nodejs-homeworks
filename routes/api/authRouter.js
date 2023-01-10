@@ -6,6 +6,8 @@ const {
   getCurrentUserController,
   updateSubscriptionController,
   updateAvatarController,
+  verificationController,
+  resendVerificationController,
 } = require("../../controllers/authControllers");
 const { asyncWrapper } = require("../../helper/apiHelpers");
 const {
@@ -16,11 +18,12 @@ const {
   validationRegistration,
   validationLogin,
   validationSub,
+  resendVerificationValidation,
 } = require("../../middlewares/validation");
 
 const router = express.Router();
 
-router.use(authTokenCheckMiddleware);
+// router.use(authTokenCheckMiddleware);
 
 router.post(
   "/signup",
@@ -30,16 +33,28 @@ router.post(
 
 router.post("/login", validationLogin, asyncWrapper(loginController));
 
-router.get("/logout", asyncWrapper(logoutController));
+router.get("/logout", authTokenCheckMiddleware, asyncWrapper(logoutController));
 
-router.get("/current", asyncWrapper(getCurrentUserController));
+router.get(
+  "/current",
+  authTokenCheckMiddleware,
+  asyncWrapper(getCurrentUserController)
+);
 
-router.patch("/", validationSub, asyncWrapper(updateSubscriptionController));
+router.patch(
+  "/",
+  [authTokenCheckMiddleware, validationSub],
+  asyncWrapper(updateSubscriptionController)
+);
 
 router.patch(
   "/avatars",
-  uploadMiddleware.single("avatar"),
+  [authTokenCheckMiddleware, uploadMiddleware.single("avatar")],
   asyncWrapper(updateAvatarController)
 );
+
+router.get("/verify/:verificationToken", asyncWrapper(verificationController));
+
+router.post("/verify", resendVerificationValidation, asyncWrapper(resendVerificationController));
 
 module.exports = router;
