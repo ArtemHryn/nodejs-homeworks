@@ -3,7 +3,13 @@ const { MainError } = require("../helper/errors");
 const { User } = require("../models/userModel");
 
 const authTokenCheckMiddleware = async (req, res, next) => {
+
+  if (!req.headers.authorization) {
+    next(new MainError(401, "Please, provide your token"))
+  }
+
   const [, token] = req.headers.authorization.split(" ");
+  
   if (!token) {
     next(new MainError(401, "Not authorized"));
   }
