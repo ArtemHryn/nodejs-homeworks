@@ -54,7 +54,7 @@ const updateAvatar = async (userId, avatarURL) => {
   await User.findOneAndUpdate({ _id: userId }, { $set: { avatarURL } });
 };
 
-const verification = async (verificationToken) => {
+const verifyUser = async (verificationToken) => {
   const user = await User.findOne({ verificationToken, verify: false });
   if (!user) {
     throw new MainError(404, "User not found");
@@ -84,6 +84,6 @@ module.exports = {
   currentUser,
   updateSubscription,
   updateAvatar,
-  verification,
+  verifyUser,
   resendVerification,
 };

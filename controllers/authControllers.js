@@ -8,7 +8,7 @@ const {
   currentUser,
   updateSubscription,
   updateAvatar,
-  verification,
+  verifyUser,
   resendVerification,
 } = require("../services/authServices");
 
@@ -70,7 +70,7 @@ const updateAvatarController = async (req, res, next) => {
 
 const verificationController = async (req, res) => {
   const { verificationToken } = req.params;
-  await verification(verificationToken);
+  await verifyUser(verificationToken);
   res.status(200).json({ status: "Verification successful" });
 };
 
